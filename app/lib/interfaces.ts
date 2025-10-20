@@ -8,15 +8,14 @@ export interface User {
 
 export interface Account extends User {
     id?: number;
+    idAccount?: number;
     type_account: string;
     initial_amount: number;
 }
 
-export interface Transaction {
-    user: User;
-    account: Account;
-    idTransaction: number;
-    typeTransaction: string;
+export interface Transaction extends User, Account {
+    id: number;
+    type_transaction: string;
     amount: number;
 }
 

@@ -36,7 +36,8 @@ export async function POST(req: NextRequest) {
             }, {status: 404});    
         }
 
-        const newAmount = data.typeTransaction === 'deposit' ? parseInt(account[0].initial_amount) + parseInt(data.amount) : parseInt(account[0].initial_amount) - parseInt(data.amount);
+        
+        const newAmount = data.typeTransaction === 'Deposito' ? parseInt(account[0].initial_amount) + parseInt(data.amount) : parseInt(account[0].initial_amount) - parseInt(data.amount);
         await updateInitialAmount([newAmount, data.accountId]);
 
         const transaction = await createTransaction(Object.values(data));
@@ -45,7 +46,7 @@ export async function POST(req: NextRequest) {
             ok: true,
             error: null,
             status: 200,
-            data: transaction
+            transaction
         }, {status: 200});
     } catch (error: any) {
         return NextResponse.json({

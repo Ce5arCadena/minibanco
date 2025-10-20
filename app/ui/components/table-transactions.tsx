@@ -1,10 +1,25 @@
 'use client';
 
-import { useAtomValue } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { transactionsAtom } from "@/app/lib/atoms";
+import { useEffect } from "react";
+import axios from "axios";
 
-export default function TableTransactions({setShowCreateTransaction}: {setShowCreateTransaction: (value: boolean) => void}) {
+export default function TableTransactions({setShowCreateTransaction, setTypeTransaction}: {setShowCreateTransaction: (value: boolean) => void, setTypeTransaction: (value: string) => void}) {
+    const setTransactionsAtom = useSetAtom(transactionsAtom);
     const transactionAtomValue = useAtomValue(transactionsAtom);
+
+    const getTransactions = async() => {
+        const {data} = await axios.get('/api/transactions');
+        console.log(data);
+        if (!data.ok) return;
+
+        setTransactionsAtom(data.data);
+    };
+
+    useEffect(() => {
+        getTransactions();
+    }, []);
 
     return(
         <div className="relative w-full">
@@ -12,7 +27,10 @@ export default function TableTransactions({setShowCreateTransaction}: {setShowCr
                 <div className="flex justify-end sm:flex-row flex-wrap space-y-4 w-full sm:space-y-0 items-center p-2">
                     <div className="flex w-[50%] gap-3 justify-end">
                         <button
-                            onClick={() => setShowCreateTransaction(true)}
+                            onClick={() => { 
+                                setShowCreateTransaction(true);
+                                setTypeTransaction('Deposito');
+                            }}
                                 className=" bg-green-600 text-white p-2 rounded-lg shadow hover:bg-blue-700 transition cursor-pointer"
                             >
                             Crear Consignación
@@ -20,6 +38,10 @@ export default function TableTransactions({setShowCreateTransaction}: {setShowCr
 
                         <button
                             className="bg-blue-600 text-white p-2 rounded-lg shadow hover:bg-blue-700 transition cursor-pointer"
+                            onClick={() => { 
+                                setShowCreateTransaction(true);
+                                setTypeTransaction('Retiro');
+                            }}
                         >
                             Crear Retiro
                         </button>
@@ -52,22 +74,22 @@ export default function TableTransactions({setShowCreateTransaction}: {setShowCr
                                     <th colSpan={5} className="text-center p-3">No hay transacciones creadas</th>
                                 </tr>
                             ) : (
-                                transactionAtomValue.map(({user, account, idTransaction, typeTransaction, amount}) => (
-                                    <tr className="bg-white border-gray-200 hover:bg-gray-200" key={idTransaction++}>
+                                transactionAtomValue.map(({id, type_account, name, last_name, amount, type_transaction}) => (
+                                    <tr className="bg-white border-gray-200 hover:bg-gray-200" key={id}>
                                         <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                                            {idTransaction}
+                                            {id}
                                         </th>
                                         <td className="px-6 py-4">
-                                            {account.typeAccount} - {account.idAccount}
+                                            {type_account}
                                         </td>
                                         <td className="px-6 py-4">
-                                            {user?.name} {user?.lastName}
+                                            {name} {last_name}
                                         </td>
                                         <td className="px-6 py-4">
                                             {amount}
                                         </td>
                                         <td className="px-6 py-4">
-                                            {typeTransaction}
+                                            {type_transaction}
                                         </td>
                                     </tr>
                                 ))  
